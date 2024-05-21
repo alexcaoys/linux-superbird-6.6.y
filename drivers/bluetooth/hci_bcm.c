@@ -1259,8 +1259,8 @@ static int bcm_probe(struct platform_device *pdev)
 	dev->dev = &pdev->dev;
 
 	ret = platform_get_irq(pdev, 0);
-	if (ret < 0)
-		return ret;
+	// if (ret < 0)
+		// 	return ret;
 
 	dev->irq = ret;
 
@@ -1311,6 +1311,8 @@ static const struct hci_uart_proto bcm_proto = {
 	.name		= "Broadcom",
 	.manufacturer	= 15,
 	.init_speed	= 115200,
+	// Modified for AmPak chipset.
+	.oper_speed	= 3000000,
 	.open		= bcm_open,
 	.close		= bcm_close,
 	.flush		= bcm_flush,
@@ -1501,6 +1503,14 @@ static const struct acpi_device_id bcm_acpi_match[] = {
 MODULE_DEVICE_TABLE(acpi, bcm_acpi_match);
 #endif
 
+#ifdef CONFIG_OF
+static const struct of_device_id bcm_bluetooth_platform_of_match[] = {
+	{ .compatible = "brcm,bcm4345c0" },
+	{ },
+};
+MODULE_DEVICE_TABLE(of, bcm_bluetooth_platform_of_match);
+#endif
+
 /* suspend and resume callbacks */
 static const struct dev_pm_ops bcm_pm_ops = {
 	SET_SYSTEM_SLEEP_PM_OPS(bcm_suspend, bcm_resume)
@@ -1512,6 +1522,7 @@ static struct platform_driver bcm_driver = {
 	.remove = bcm_remove,
 	.driver = {
 		.name = "hci_bcm",
+		.of_match_table = of_match_ptr(bcm_bluetooth_platform_of_match),
 		.acpi_match_table = ACPI_PTR(bcm_acpi_match),
 		.pm = &bcm_pm_ops,
 	},
