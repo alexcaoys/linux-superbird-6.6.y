@@ -1,0 +1,702 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2018 BayLibre SAS. All rights reserved.
+ */
+
+/dts-v1/;
+
+#include "meson-g12a.dtsi"
+// #include "superbird_panel.dtsi"
+#include <dt-bindings/gpio/meson-g12a-gpio.h>
+
+/ {
+	compatible = "amlogic,u200", "amlogic,g12a";
+	model = "Amlogic Meson G12A Superbird";
+
+	aliases {
+		serial0 = &uart_AO;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x0 0x0 0x20000000>;
+	};
+
+	emmc_pwrseq: emmc-pwrseq {
+		compatible = "mmc-pwrseq-emmc";
+		reset-gpios = <&gpio BOOT_12 GPIO_ACTIVE_LOW>;
+	};
+
+	// sdio_pwrseq: sdio-pwrseq {
+	// 	compatible = "mmc-pwrseq-simple";
+	// 	reset-gpios = <&gpio GPIOX_6 GPIO_ACTIVE_LOW>;
+	// 	clocks = <&wifi32k>;
+	// 	clock-names = "ext_clock";
+	// };
+
+	typec2_vbus: regulator-typec2_vbus {
+		compatible = "regulator-fixed";
+		regulator-name = "TYPEC2_VBUS";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		vin-supply = <&ao_5v>;
+	};
+
+	ao_5v: regulator-ao_5v {
+		compatible = "regulator-fixed";
+		regulator-name = "AO_5V";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+	};
+
+	vcc_1v8: regulator-vcc_1v8 {
+		compatible = "regulator-fixed";
+		regulator-name = "VCC_1V8";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		vin-supply = <&vcc_3v3>;
+		regulator-always-on;
+	};
+
+	vcc_3v3: regulator-vcc_3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "VCC_3V3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		vin-supply = <&vddao_3v3>;
+		regulator-always-on;
+	};
+
+	vddao_1v8: regulator-vddao_1v8 {
+		compatible = "regulator-fixed";
+		regulator-name = "VDDAO_1V8";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		vin-supply = <&vddao_3v3>;
+		regulator-always-on;
+	};
+
+	vddao_3v3: regulator-vddao_3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "VDDAO_3V3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		vin-supply = <&ao_5v>;
+		regulator-always-on;
+	};
+
+	vddcpu: regulator-vddcpu {
+		compatible = "pwm-regulator";
+
+		regulator-name = "VDDCPU";
+		regulator-min-microvolt = <721000>;
+		regulator-max-microvolt = <1022000>;
+
+		vin-supply = <&ao_5v>;
+
+		pwms = <&pwm_AO_cd 1 1250 0>;
+		pwm-dutycycle-range = <100 0>;
+
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
+	dmics: audio-codec {
+		#sound-dai-cells = <0>;
+		compatible = "dmic-codec";
+		num-channels = <4>;
+		wakeup-delay-ms = <50>;
+		status = "okay";
+		sound-name-prefix = "MIC";
+	};
+
+	gpioleds {
+		compatible = "gpio-leds";
+		status = "okay";
+		led0 {
+			gpios = <&gpio_ao GPIOAO_5 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys-polled";
+		poll-interval = <40>;
+		status = "okay";
+
+		pinctrl-names="default";
+		pinctrl-0=<&superbird_buttons>, <&superbird_buttons_ao>;
+
+		preset1 {
+			label = "GPIO Key preset1";
+			linux,code = <2>;
+			gpios = <&gpio GPIOA_0 GPIO_ACTIVE_LOW>;
+		};
+
+		preset2 {
+			label = "GPIO Key preset2";
+			linux,code = <3>;
+			gpios = <&gpio GPIOA_1 GPIO_ACTIVE_LOW>;
+		};
+
+		preset3 {
+			label = "GPIO Key preset3";
+			linux,code = <4>;
+			gpios = <&gpio GPIOA_2 GPIO_ACTIVE_LOW>;
+		};
+
+		preset4 {
+			label = "GPIO Key preset4";
+			linux,code = <5>;
+			gpios = <&gpio GPIOA_3 GPIO_ACTIVE_LOW>;
+		};
+
+		mute {
+			label = "GPIO Key mute";
+			linux,code = <50>;
+			gpios = <&gpio_ao GPIOAO_3 GPIO_ACTIVE_LOW>;
+		};
+
+		back {
+			label = "GPIO Key back";
+			linux,code = <1>;
+			gpios = <&gpio GPIOA_5 GPIO_ACTIVE_LOW>;
+		};
+
+		select {
+			label = "GPIO Key select";
+			linux,code = <28>;
+			gpios = <&gpio GPIOZ_7 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	rotary@0 {
+		compatible = "rotary-encoder";
+
+		pinctrl-names="default";
+		pinctrl-0=<&superbird_rotary>;
+
+		gpios = <&gpio GPIOZ_8 GPIO_ACTIVE_LOW>, 
+			<&gpio GPIOZ_9 GPIO_ACTIVE_LOW>;
+		
+		linux,axis = <6>; /* REL_HWHEEL */
+		rotary-encoder,encoding = "gray";
+		rotary-encoder,relative-axis;
+		rotary-encoder,steps-per-period = <2>;
+		wakeup-source = <0>;
+	};
+
+	sound {
+		compatible = "amlogic,axg-sound-card";
+		model = "SUPERBIRD";
+		// audio-aux-devs = <&pdm>;
+		audio-routing =
+			"TODDR_A IN 4", "PDM Capture";
+
+		assigned-clocks = <&clkc CLKID_MPLL2>,
+				  <&clkc CLKID_MPLL0>,
+				  <&clkc CLKID_MPLL1>;
+		assigned-clock-parents = <0>, <0>, <0>;
+		assigned-clock-rates = <294912000>,
+				       <270950400>,
+				       <393216000>;
+		status = "okay";
+
+		dai-link-0 {
+			sound-dai = <&toddr_a>;
+		};
+
+		dai-link-1 {
+			sound-dai = <&pdm>;
+
+			codec {
+				sound-dai = <&dmics>;
+			};
+		};
+	};
+
+	bluetooth {
+		compatible = "brcm,bcm4345c0";
+		max-speed = <3000000>;
+		device-wakeup-gpios = <&gpio GPIOX_7 GPIO_ACTIVE_LOW>;
+		host-wakeup-gpios = <&gpio GPIOX_6 GPIO_ACTIVE_LOW>;
+	};
+
+	disabled-pins {
+		pinctrl-names = "default";
+		pinctrl-0 = <&superbird_disabled_pins_a
+			&superbird_disabled_pins_c
+			&superbird_disabled_pins_h>;
+		status = "okay";
+	};
+
+	backlight {
+		compatible = "pwm-backlight";
+		pwms = <&pwm_ef 1 30040 0>;
+
+		brightness-levels = <0 255>;
+		num-interpolated-steps = <255>;
+		default-brightness-level = <100>;
+
+		enable-gpios = <&gpio GPIOH_4 GPIO_ACTIVE_HIGH>;
+		post-pwm-on-delay-ms = <10>;
+		pwm-off-delay-ms = <10>;
+	};
+};
+
+/* cpu */
+&cpu0 {
+	cpu-supply = <&vddcpu>;
+	operating-points-v2 = <&cpu_opp_table>;
+	clocks = <&clkc CLKID_CPU_CLK>;
+	clock-latency = <50000>;
+};
+
+&cpu1 {
+	cpu-supply = <&vddcpu>;
+	operating-points-v2 = <&cpu_opp_table>;
+	clocks = <&clkc CLKID_CPU_CLK>;
+	clock-latency = <50000>;
+};
+
+&cpu2 {
+	cpu-supply = <&vddcpu>;
+	operating-points-v2 = <&cpu_opp_table>;
+	clocks = <&clkc CLKID_CPU_CLK>;
+	clock-latency = <50000>;
+};
+
+&cpu3 {
+	cpu-supply = <&vddcpu>;
+	operating-points-v2 = <&cpu_opp_table>;
+	clocks = <&clkc CLKID_CPU_CLK>;
+	clock-latency = <50000>;
+};
+
+&pwm_AO_cd {
+	status = "okay";
+	pinctrl-0 = <&pwm_ao_d_e_pins>;
+	pinctrl-names = "default";
+	clocks = <&xtal>;
+	clock-names = "clkin1";
+};
+
+&pwm_ef {
+	status = "okay";
+	pinctrl-0 = <&pwm_f_h_pins>;
+	pinctrl-names = "default";
+	clocks = <&xtal>;
+	clock-names = "clkin1";
+};
+
+/* Sound */
+&arb {
+	status = "okay";
+};
+
+&clkc_audio {
+	status = "okay";
+};
+
+&toddr_a {
+	status = "okay";
+};
+
+&pdm {
+	pinctrl-0 = <&pdm_dclk_a_pins>, <&pdm_din0_a_pins>, <&pdm_din1_a_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+/* saradc */
+&saradc {
+	status = "okay";
+	vref-supply = <&vddao_1v8>;
+};
+
+/* eMMC */
+&sd_emmc_c {
+	status = "okay";
+	pinctrl-0 = <&emmc_ctrl_pins>, <&emmc_data_8b_pins>, <&emmc_ds_pins>;
+	pinctrl-1 = <&emmc_clk_gate_pins>;
+	pinctrl-names = "default", "clk-gate";
+
+	bus-width = <8>;
+	cap-mmc-highspeed;
+	mmc-ddr-1_8v;
+	mmc-hs200-1_8v;
+	max-frequency = <200000000>;
+	disable-wp;
+
+	mmc-pwrseq = <&emmc_pwrseq>;
+	vmmc-supply = <&vcc_3v3>;
+	vqmmc-supply = <&vcc_1v8>;
+};
+
+/* pinctrl */
+&ao_pinctrl {
+	superbird_buttons_ao: superbird_buttons_ao {
+		mux {
+			groups = "GPIOAO_3";
+			bias-disable;
+			input-enable;
+		};
+	};
+};
+
+&periphs_pinctrl {
+	// Buttons
+	superbird_buttons: superbird_buttons {
+		mux { /* GPIOA_5 GPIOA_6 */
+			groups = "GPIOA_0",
+				"GPIOA_1",
+				"GPIOA_2",
+				"GPIOA_3",
+				// "GPIOAO_3",
+				"GPIOA_5";
+			bias-disable;
+			input-enable;
+		};
+	};
+
+	superbird_rotary: superbird_rotary {
+		mux {
+			groups = "GPIOZ_7", 
+				"GPIOZ_8",
+				"GPIOZ_9";
+			bias-disable;
+			input-enable;
+		};
+	};
+
+	// Touch Related
+	superbird_touch_i2c: superbird_touch_i2c {
+		mux { /* GPIOZ_0 GPIOZ_1 */
+			groups = "i2c0_sda_z0", "i2c0_sck_z1";
+			function = "i2c0";
+            drive-strength = <1>;
+		};
+	};
+
+	superbird_touch_gpio: superbird_touch_gpio {
+		mux {
+			groups = "GPIOZ_3", "GPIOZ_4";
+			function = "gpio_periphs";
+            drive-strength = <1>;
+		};
+	};
+
+	tp_int_input: eint@0 {
+		mux {
+			groups = "GPIOZ_4";
+			bias-pull-up;
+		};
+	};
+
+	state_rst_output0: rstoutput0 {
+		mux {
+			groups = "GPIOZ_3";
+			output-low;
+			bias-pull-down;
+            drive-strength = <1>;
+		};
+	};
+
+	state_rst_output1: rstoutput1 {
+		mux {
+			groups = "GPIOZ_3";
+			output-high;
+			bias-pull-up;
+            drive-strength = <1>;
+		};
+	};
+
+	// IIO Sensors
+	superbird_prox_gpio: superbird_prox_gpio {
+		mux {
+			groups = "GPIOZ_10";
+			bias-pull-down;
+		};
+	};
+
+	superbird_imu_gpio: superbird_imu_gpio {
+		mux {
+			groups = "GPIOZ_12", "GPIOZ_13";
+			bias-pull-down;
+		};
+	};
+
+	// Bluetooth
+	superbird_bluetooth_bt_wake_host: superbird_bluetooth_bt_wake_host {
+		mux {
+			groups = "GPIOX_6";
+			bias-disable;
+			input-enable;
+		};
+	};
+
+	superbird_bluetooth_host_wake_bt: superbird_bluetooth_host_wake_bt {
+		mux {
+			groups = "GPIOX_7";
+			bias-disable;
+			output-enable;
+			drive-strength = "1";
+		};
+	};
+
+	superbird_lcd_reset_pin: superbird_lcd_reset_pin {
+		mux {
+			groups = "GPIOZ_5";
+			// function = "gpio_periphs";
+			bias-disable;
+			drive-strength = <1>;
+		};
+	};
+
+	bl_enable: bl_enable {
+		mux {
+			groups = "GPIOH_4";
+			function = "gpio_periphs";
+			bias-pull-up;
+			output-high;
+		};
+	};
+
+	// superbird_mfi_i2c_pins: superbird_mfi_i2c_pins {
+	// 	mux {
+	// 		groups = "i2c3_sda_a", "i2c3_sck_a";
+	// 		function = "i2c3";
+	// 		bias-disable;
+	// 		drive-strength = <2>;
+	// 	};
+	// };
+
+	superbird_disabled_pins_c: superbird_disabled_pins_c {
+		mux {
+			groups = "GPIOC_0",
+				"GPIOC_1",
+				"GPIOC_2",
+				"GPIOC_3",
+				"GPIOC_5",
+				"GPIOC_6",
+				"GPIOC_7";
+			bias-pull-down;
+			output-low;
+		};
+	};
+
+	superbird_disabled_pins_a: superbird_disabled_pins_a {
+		mux {
+			groups = "GPIOA_10",
+				"GPIOA_11",
+				"GPIOA_12",
+				"GPIOA_13";
+			bias-pull-down;
+			output-low;
+		};
+	};
+
+	superbird_disabled_pins_h: superbird_disabled_pins_h {
+		mux {
+			groups = "GPIOH_0",
+				"GPIOH_1",
+				"GPIOH_2",
+				"GPIOH_3",
+				"GPIOH_6",
+				"GPIOH_7",
+				"GPIOH_8";
+			bias-pull-down;
+			output-low;
+		};
+	};
+};
+
+/* uart */
+&uart_A {
+	status = "okay";
+	pinctrl-0 = <&uart_a_pins>, <&uart_a_cts_rts_pins>;
+	pinctrl-names = "default";
+	uart-has-rtscts;
+
+	// bluetooth {
+	// 	compatible = "brcm,bcm4345c5";
+	// 	max-speed = <3000000>;
+	// 	shutdown-gpios = <&gpio GPIOX_17 GPIO_ACTIVE_HIGH>;
+	// 	device-wakeup-gpios = <&gpio GPIOX_7 GPIO_ACTIVE_LOW>;
+	// 	host-wakeup-gpios = <&gpio GPIOX_6 GPIO_ACTIVE_LOW>;
+	// 	// clocks = <&wifi32k>;
+	// 	// clock-names = "lpo";
+	// };
+};
+
+&uart_AO {
+	status = "okay";
+	pinctrl-0 = <&uart_ao_a_pins>;
+	pinctrl-names = "default";
+};
+
+/* usb */
+&usb {
+	status = "okay";
+};
+
+&usb2_phy0 {
+	phy-supply = <&typec2_vbus>;
+};
+
+// &usb3_pcie_phy {
+// 	phy-supply = <&typec2_vbus>;
+// };
+
+/* i2c */
+&i2c0 {
+	status = "okay";
+	interrupts = <GIC_SPI 21 IRQ_TYPE_EDGE_RISING>,
+		<GIC_SPI 91 IRQ_TYPE_EDGE_RISING>;
+
+	pinctrl-names="default";
+	pinctrl-0=<&superbird_touch_i2c>;
+	clock-frequency = <400000>;
+
+	tlsc6x_ts@2e {
+		compatible = "tlsc6x,tlsc6x_ts";
+		status = "okay";
+		reg = <0x2e>;
+		reset-gpio = <&gpio GPIOZ_3 GPIO_ACTIVE_HIGH>;
+		irq-gpio = <&gpio GPIOZ_4 GPIO_ACTIVE_HIGH>;
+		polling-mode = <0>; /*1:polling mode, 0:irq mode*/
+		TP_MAX_X = <480>;
+		TP_MAX_Y = <800>;
+	};
+};
+
+&i2c2 {
+	status = "okay";
+	interrupts = <GIC_SPI 215 IRQ_TYPE_EDGE_RISING>,
+		<GIC_SPI 94 IRQ_TYPE_EDGE_RISING>;
+
+	pinctrl-names="default";
+	pinctrl-0=<&i2c2_sda_z_pins>, <&i2c2_sck_z_pins>, 
+		<&superbird_prox_gpio>, <&superbird_imu_gpio>;
+
+	clock-frequency= <400000>;
+
+	lis2dh12@18 {
+		compatible = "st,lis2dh12-accel";
+		reg = <0x18>;
+	};
+	
+	// max20332@35 {
+	// 	reg = <0x35>;
+	// };
+	
+	tmd27721@39 {
+		compatible = "amstaos,tmd2772";
+		reg = <0x39>;
+		// enable-proxy = "false";
+		// enable-als = "true";
+	};
+};
+
+// &i2c3 {
+// 	status = "okay";
+// 	pinctrl-names="default";
+// 	pinctrl-0=<&superbird_mfi_i2c_pins>;
+// 	clock-frequency= <400000>;
+
+// 	mfi@10 {
+// 		compatible = "apple_mfi_auth";
+// 		reg = <0x10>;		
+// 	};
+// };
+
+/* efuse nvmem */
+&efuse {
+	eth_mac: eth_mac@0 {
+		reg = <0x0 0x06>;
+	};
+
+	bt_mac: bt_mac@6 {
+		reg = <0x6 0x06>;
+	};
+
+	wifi_mac: wifi_mac@12 {
+		reg = <0x0c 0x06>;
+	};
+
+	usid: usid@18 {
+		reg = <0x12 0x10>;
+	};
+
+	f_serial: f_serial@34 {
+		reg = <0x22 0x0f>;
+	};
+};
+
+&gpio_intc {
+	 compatible = "amlogic,meson-gpio-intc-ext",
+					"amlogic,meson-g12a-gpio-intc";
+};
+
+&eth_phy {
+	status = "disabled";
+};
+
+&mipi_analog_dphy {
+	status = "okay";
+};
+
+&mipi_dphy {
+	status = "okay";
+};
+
+&mipi_dsi {
+	status = "okay";
+
+	assigned-clocks = <&clkc CLKID_GP0_PLL>,
+			  <&clkc CLKID_MIPI_DSI_PXCLK_SEL>,
+			  <&clkc CLKID_MIPI_DSI_PXCLK>,
+			  <&clkc CLKID_CTS_ENCL_SEL>,
+			  <&clkc CLKID_VCLK2_SEL>;
+	assigned-clock-parents = <0>,
+				 <&clkc CLKID_GP0_PLL>,
+				 <0>,
+				 <&clkc CLKID_VCLK2_DIV1>,
+				 <&clkc CLKID_GP0_PLL>;
+	assigned-clock-rates = <846000000>,
+			       <0>,
+			       <846000000>,
+			       <0>,
+			       <0>;
+
+	panel@0 {
+		compatible = "spotify,superbird", "sitronix,st7701";
+		reg = <0>;
+		// VCC-supply = <&vcc_3v3>;
+		// IOVCC-supply = <&vcc_3v3>;
+		reset-gpios = <&gpio GPIOZ_5 GPIO_ACTIVE_HIGH>;
+		// backlight = <&panel_backlight>;
+
+		port {
+			mipi_in_panel: endpoint {
+				remote-endpoint = <&mipi_out_panel>;
+			};
+		};
+	};
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@1 {
+			mipi_out_panel: endpoint {
+				remote-endpoint = <&mipi_in_panel>;
+			};
+		};
+	};
+};
