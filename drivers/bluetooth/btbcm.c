@@ -465,8 +465,8 @@ static int btbcm_print_controller_features(struct hci_dev *hdev)
 	kfree_skb(skb);
 
 	/* Read DMI and disable broken Read LE Min/Max Tx Power */
-	if (dmi_first_match(disable_broken_read_transmit_power))
-		set_bit(HCI_QUIRK_BROKEN_READ_TRANSMIT_POWER, &hdev->quirks);
+	// if (dmi_first_match(disable_broken_read_transmit_power))
+	set_bit(HCI_QUIRK_BROKEN_READ_TRANSMIT_POWER, &hdev->quirks);
 
 	return 0;
 }
@@ -514,6 +514,7 @@ static const struct bcm_subver_table bcm_uart_subver_table[] = {
 	{ 0x4106, "BCM4335A0"	},	/* 002.001.006 */
 	{ 0x410c, "BCM43430B0"	},	/* 002.001.012 */
 	{ 0x2119, "BCM4373A0"	},	/* 001.001.025 */
+	{ 0x220b, "BCM20703A2"	},	/* 001.002.011 */
 	{ }
 };
 
