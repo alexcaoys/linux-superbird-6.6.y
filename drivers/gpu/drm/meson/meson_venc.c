@@ -1584,6 +1584,7 @@ static void meson_encl_set_gamma_table(struct meson_drm *priv, u16 *data,
 	int i, ret;
 	u32 reg;
 
+	pr_warn("%s: meson_encl_set_gamma_table", __func__);
 	writel_bits_relaxed(L_GAMMA_CNTL_PORT_EN, 0,
 			    priv->io_base + _REG(L_GAMMA_CNTL_PORT));
 
@@ -1601,7 +1602,7 @@ static void meson_encl_set_gamma_table(struct meson_drm *priv, u16 *data,
 						 reg, reg & L_GAMMA_CNTL_PORT_WR_RDY,
 						 10, 10000);
 		if (ret)
-			pr_warn_once("%s: GAMMA WR_RDY timeout\n", __func__);
+			pr_warn_once("%s: GAMMA WR_RDY timeout %d\n", __func__, i);
 
 		writel_relaxed(data[i], priv->io_base + _REG(L_GAMMA_DATA_PORT));
 	}
