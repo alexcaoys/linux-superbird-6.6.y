@@ -668,9 +668,9 @@
 				 <0>,
 				 <&clkc CLKID_VCLK2_DIV1>,
 				 <&clkc CLKID_GP0_PLL>;
-	assigned-clock-rates = <846000000>,
+	assigned-clock-rates = <360000000>,
 			       <0>,
-			       <846000000>,
+			       <360000000>,
 			       <0>,
 			       <0>;
 
