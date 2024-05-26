@@ -208,12 +208,13 @@ static void st7701_init_sequence(struct st7701 *st7701)
 
 	msleep(st7701->sleep_delay);
 
-	// st7701_switch_cmd_bkx(st7701, true, 3);
-	// ST7701_DSI(st7701, 0xEF, 0x08);
-
 	/* Command2, BK0 */
 	st7701_switch_cmd_bkx(st7701, true, 0);
 
+	mipi_dsi_dcs_write(st7701->dsi, DSI_CMD2_BK0_PVGAMCTRL,
+			   desc->pv_gamma, ARRAY_SIZE(desc->pv_gamma));
+	mipi_dsi_dcs_write(st7701->dsi, DSI_CMD2_BK0_NVGAMCTRL,
+			   desc->nv_gamma, ARRAY_SIZE(desc->nv_gamma));
 	/*
 	 * Vertical line count configuration:
 	 * Line[6:0]: select number of vertical lines of the TFT matrix in
@@ -248,13 +249,6 @@ static void st7701_init_sequence(struct st7701 *st7701)
 		   FIELD_PREP(DSI_CMD2_BK0_INVSEL_RTNI_MASK,
 			      (clamp((u32)mode->htotal, 512U, 1008U) - 512) / 16));
 	// ST7701_DSI(st7701, DSI_CMD2_BK0_INVSEL, 0x31, 0x07);
-
-	// ST7701_DSI(st7701, 0xCC, 0x10);
-
-	mipi_dsi_dcs_write(st7701->dsi, DSI_CMD2_BK0_PVGAMCTRL,
-			   desc->pv_gamma, ARRAY_SIZE(desc->pv_gamma));
-	mipi_dsi_dcs_write(st7701->dsi, DSI_CMD2_BK0_NVGAMCTRL,
-			   desc->nv_gamma, ARRAY_SIZE(desc->nv_gamma));
 
 	/* Command2, BK1 */
 	st7701_switch_cmd_bkx(st7701, true, 1);
@@ -299,11 +293,7 @@ static void st7701_init_sequence(struct st7701 *st7701)
 		   FIELD_PREP(DSI_CMD2_BK1_PWRCTRL2_AVCL_MASK,
 			      DIV_ROUND_CLOSEST(-4400 - desc->avcl_mv, 200)));
 
-	// ST7701_DSI(st7701, 0xB9, 0x10, 0x1F);
-	// ST7701_DSI(st7701, 0xBB, 0x03);
-	// ST7701_DSI(st7701, 0xBC, 0x3E);
-
-	/* T2D = 0.2us * T2D[3:0] */
+		/* T2D = 0.2us * T2D[3:0] */
 	ST7701_DSI(st7701, DSI_CMD2_BK1_SPD1,
 		   DSI_CMD2_BK1_SPD1_ONES_MASK |
 		   FIELD_PREP(DSI_CMD2_BK1_SPD1_T2D_MASK,
@@ -436,8 +426,17 @@ static void kd50t048a_gip_sequence(struct st7701 *st7701)
 		   0xFF, 0xFF, 0xFF, 0xFF, 0x10, 0x45, 0x67, 0x98, 0xBA);
 }
 
-static void superbord_gip_sequence(struct st7701 *st7701)
+static void superbird_gip_sequence(struct st7701 *st7701)
 {
+	st7701_switch_cmd_bkx(st7701, true, 3);
+	ST7701_DSI(st7701, 0xEF, 0x08);
+	st7701_switch_cmd_bkx(st7701, true, 0);
+	ST7701_DSI(st7701, 0xCC, 0x10);
+	st7701_switch_cmd_bkx(st7701, true, 1);
+	ST7701_DSI(st7701, 0xB9, 0x10, 0x1F);
+	ST7701_DSI(st7701, 0xBB, 0x03);
+	ST7701_DSI(st7701, 0xBC, 0x3E);
+	
 	ST7701_DSI(st7701, 0xE0, 0x00, 0x00, 0x02);
 	ST7701_DSI(st7701, 0xE1, 0x04, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00,
 		   0x00, 0x00, 0x20, 0x20);
@@ -495,13 +494,11 @@ static int st7701_prepare(struct drm_panel *panel)
 
 	st7701_init_sequence(st7701);
 
-	msleep(8);
-
 	if (st7701->desc->gip_sequence)
 		st7701->desc->gip_sequence(st7701);
 
 	/* Disable Command2 */
-	// st7701_switch_cmd_bkx(st7701, false, 0);
+	st7701_switch_cmd_bkx(st7701, false, 0);
 
 	return 0;
 }
@@ -572,8 +569,6 @@ static int st7701_get_modes(struct drm_panel *panel,
 
 	connector->display_info.width_mm = desc_mode->width_mm;
 	connector->display_info.height_mm = desc_mode->height_mm;
-	connector->display_info.bpc = 48;
-	connector->display_info.bus_flags = DRM_BUS_FLAG_DE_HIGH;
 
 	/*
 	 * TODO: Remove once all drm drivers call
@@ -1022,7 +1017,7 @@ static const struct st7701_panel_desc superbird_desc = {
 	.t3d_ns = 10400,
 	// .t3d_ns = 6400,
 	.eot_en = true,
-	.gip_sequence = superbord_gip_sequence,
+	.gip_sequence = superbird_gip_sequence,
 };
 
 static int st7701_dsi_probe(struct mipi_dsi_device *dsi)
