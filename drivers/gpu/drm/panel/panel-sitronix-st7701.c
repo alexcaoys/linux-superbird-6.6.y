@@ -235,9 +235,7 @@ static void st7701_init_sequence(struct st7701 *st7701)
 			      mode->vtotal - mode->vsync_end),
 		   FIELD_PREP(DSI_CMD2_BK0_PORCTRL_VFP_MASK,
 			      mode->vsync_start - mode->vdisplay));
-	// ST7701_DSI(st7701, DSI_CMD2_BK0_PORCTRL, 0x0A, 0x02);
-
-	/*
+		/*
 	 * Horizontal pixel count configuration:
 	 * PCLK = 512 + (RTNI[4:0] * 16)
 	 * The PCLK is number of pixel clock per line, which matches
@@ -248,8 +246,7 @@ static void st7701_init_sequence(struct st7701 *st7701)
 		   FIELD_PREP(DSI_CMD2_BK0_INVSEL_NLINV_MASK, desc->nlinv),
 		   FIELD_PREP(DSI_CMD2_BK0_INVSEL_RTNI_MASK,
 			      (clamp((u32)mode->htotal, 512U, 1008U) - 512) / 16));
-	// ST7701_DSI(st7701, DSI_CMD2_BK0_INVSEL, 0x31, 0x07);
-
+	
 	/* Command2, BK1 */
 	st7701_switch_cmd_bkx(st7701, true, 1);
 
@@ -480,8 +477,7 @@ static int st7701_prepare(struct drm_panel *panel)
 	struct st7701 *st7701 = panel_to_st7701(panel);
 	int ret;
 
-	dev_err(&st7701->dsi->dev, "st7701_prepare");
-	gpiod_set_value(st7701->reset, 0);
+		gpiod_set_value(st7701->reset, 0);
 
 	ret = regulator_bulk_enable(ARRAY_SIZE(st7701->supplies),
 				    st7701->supplies);
@@ -507,8 +503,7 @@ static int st7701_enable(struct drm_panel *panel)
 {
 	struct st7701 *st7701 = panel_to_st7701(panel);
 
-	dev_err(&st7701->dsi->dev, "st7701_enable");
-	ST7701_DSI(st7701, MIPI_DCS_SET_DISPLAY_ON, 0x00);
+		ST7701_DSI(st7701, MIPI_DCS_SET_DISPLAY_ON, 0x00);
 
 	return 0;
 }
@@ -555,8 +550,7 @@ static int st7701_get_modes(struct drm_panel *panel,
 	const struct drm_display_mode *desc_mode = st7701->desc->mode;
 	struct drm_display_mode *mode;
 
-	dev_err(&st7701->dsi->dev, "st7701_get_modes");
-	mode = drm_mode_duplicate(connector->dev, desc_mode);
+		mode = drm_mode_duplicate(connector->dev, desc_mode);
 	if (!mode) {
 		dev_err(&st7701->dsi->dev, "failed to add mode %ux%u@%u\n",
 			desc_mode->hdisplay, desc_mode->vdisplay,
@@ -895,29 +889,29 @@ static const struct st7701_panel_desc kd50t048a_desc = {
 };
 
 static const struct drm_display_mode superbird_mode = {
-	.clock          = 30000,
-
-	.hdisplay       = 480,
-	.hsync_start    = 480 + 48,
-	.hsync_end      = 480 + 48 + 24,
-	.htotal         = 480 + 48 + 24 + 24,
-
-	.vdisplay       = 800,
-	.vsync_start    = 800 + 10,
-	.vsync_end      = 800 + 10 + 32,
-	.vtotal         = 800 + 10 + 32 + 10,
-
-	// .clock          = 36000,
+	// .clock          = 30000,
 
 	// .hdisplay       = 480,
-	// .hsync_start    = 480 + 50,
-	// .hsync_end      = 480 + 50 + 160,
-	// .htotal         = 480 + 50 + 160 + 50,
+	// .hsync_start    = 480 + 40,
+	// .hsync_end      = 480 + 40 + 140,
+	// .htotal         = 480 + 40 + 140 + 40,
 
 	// .vdisplay       = 800,
 	// .vsync_start    = 800 + 10,
-	// .vsync_end      = 800 + 10 + 500,
-	// .vtotal         = 800 + 10 + 500 + 10,
+	// .vsync_end      = 800 + 10 + 360,
+	// .vtotal         = 800 + 10 + 360 + 10,
+
+	.clock          = 36000,
+
+	.hdisplay       = 480,
+	.hsync_start    = 480 + 32,
+	.hsync_end      = 480 + 32 + 120,
+	.htotal         = 480 + 32 + 120 + 32,
+
+	.vdisplay       = 800,
+	.vsync_start    = 800 + 16,
+	.vsync_end      = 800 + 16 + 640,
+	.vtotal         = 800 + 16 + 640 + 16,
 
 	// .clock          = 27918,
 
