@@ -6,7 +6,6 @@
 /dts-v1/;
 
 #include "meson-g12a.dtsi"
-// #include "superbird_panel.dtsi"
 #include <dt-bindings/gpio/meson-g12a-gpio.h>
 
 / {
@@ -235,7 +234,7 @@
 		status = "okay";
 	};
 
-	backlight {
+	panel_backlight: backlight {
 		compatible = "pwm-backlight";
 		pwms = <&pwm_ef 1 30040 0>;
 
@@ -677,10 +676,10 @@
 	panel@0 {
 		compatible = "spotify,superbird", "sitronix,st7701";
 		reg = <0>;
-		// VCC-supply = <&vcc_3v3>;
-		// IOVCC-supply = <&vcc_3v3>;
+		VCC-supply = <&vcc_3v3>;
+		IOVCC-supply = <&vcc_3v3>;
 		reset-gpios = <&gpio GPIOZ_5 GPIO_ACTIVE_HIGH>;
-		// backlight = <&panel_backlight>;
+		backlight = <&panel_backlight>;
 
 		port {
 			mipi_in_panel: endpoint {
