@@ -889,29 +889,41 @@ static const struct st7701_panel_desc kd50t048a_desc = {
 };
 
 static const struct drm_display_mode superbird_mode = {
-	// .clock          = 30000,
+	// .clock          = 48000,	
 
 	// .hdisplay       = 480,
-	// .hsync_start    = 480 + 40,
-	// .hsync_end      = 480 + 40 + 140,
-	// .htotal         = 480 + 40 + 140 + 40,
+	// .hsync_start    = 480 + 32,
+	// .hsync_end      = 480 + 32 + 160,
+	// .htotal         = 480 + 32 + 160 + 32,
 
 	// .vdisplay       = 800,
-	// .vsync_start    = 800 + 10,
-	// .vsync_end      = 800 + 10 + 360,
-	// .vtotal         = 800 + 10 + 360 + 10,
+	// .vsync_start    = 800 + 2,
+	// .vsync_end      = 800 + 2 + 840,
+	// .vtotal         = 800 + 2 + 840 + 12,
+
+	// .clock          = 36000,
+
+	// .hdisplay       = 480,
+	// .hsync_start    = 480 + 32,
+	// .hsync_end      = 480 + 32 + 120,
+	// .htotal         = 480 + 32 + 120 + 32,
+
+	// .vdisplay       = 800,
+	// .vsync_start    = 800 + 16,
+	// .vsync_end      = 800 + 16 + 640,
+	// .vtotal         = 800 + 16 + 640 + 16,
 
 	.clock          = 36000,
 
 	.hdisplay       = 480,
-	.hsync_start    = 480 + 32,
-	.hsync_end      = 480 + 32 + 120,
-	.htotal         = 480 + 32 + 120 + 32,
+	.hsync_start    = 480 + 20, 
+	.hsync_end      = 480 + 20 + 120,
+	.htotal         = 480 + 20 + 120 + 20,
 
 	.vdisplay       = 800,
-	.vsync_start    = 800 + 16,
-	.vsync_end      = 800 + 16 + 640,
-	.vtotal         = 800 + 16 + 640 + 16,
+	.vsync_start    = 800 + 2,
+	.vsync_end      = 800 + 2 + 840,
+	.vtotal         = 800 + 2 + 840 + 10,
 
 	// .clock          = 27918,
 
