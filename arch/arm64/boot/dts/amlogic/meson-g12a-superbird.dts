@@ -277,6 +277,7 @@
 	clock-latency = <50000>;
 };
 
+/* pwm */
 &pwm_AO_cd {
 	status = "okay";
 	pinctrl-0 = <&pwm_ao_d_e_pins>;
@@ -291,25 +292,6 @@
 	pinctrl-names = "default";
 	clocks = <&xtal>;
 	clock-names = "clkin1";
-};
-
-/* Sound */
-&arb {
-	status = "okay";
-};
-
-&clkc_audio {
-	status = "okay";
-};
-
-&toddr_a {
-	status = "okay";
-};
-
-&pdm {
-	pinctrl-0 = <&pdm_dclk_a_pins>, <&pdm_din0_a_pins>, <&pdm_din1_a_pins>;
-	pinctrl-names = "default";
-	status = "okay";
 };
 
 /* saradc */
@@ -539,18 +521,33 @@
 	pinctrl-names = "default";
 };
 
+/* sound */
+&arb {
+	status = "okay";
+};
+
+&clkc_audio {
+	status = "okay";
+};
+
+&toddr_a {
+	status = "okay";
+};
+
+&pdm {
+	pinctrl-0 = <&pdm_dclk_a_pins>, <&pdm_din0_a_pins>, <&pdm_din1_a_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
 /* usb */
 &usb {
 	status = "okay";
 };
 
-&usb2_phy0 {
-	phy-supply = <&typec2_vbus>;
+&eth_phy {
+	status = "disabled";
 };
-
-// &usb3_pcie_phy {
-// 	phy-supply = <&typec2_vbus>;
-// };
 
 /* i2c */
 &i2c0 {
@@ -585,10 +582,10 @@
 
 	clock-frequency= <400000>;
 
-	lis2dh12@18 {
-		compatible = "st,lis2dh12-accel";
-		reg = <0x18>;
-	};
+	// lis2dh12@18 {
+	// 	compatible = "st,lis2dh12-accel";
+	// 	reg = <0x18>;
+	// };
 	
 	// max20332@35 {
 	// 	reg = <0x35>;
@@ -637,15 +634,7 @@
 	};
 };
 
-&gpio_intc {
-	 compatible = "amlogic,meson-gpio-intc-ext",
-					"amlogic,meson-g12a-gpio-intc";
-};
-
-&eth_phy {
-	status = "disabled";
-};
-
+/* MIPI */
 &mipi_analog_dphy {
 	status = "okay";
 };
@@ -698,4 +687,9 @@
 			};
 		};
 	};
+};
+
+&gpio_intc {
+	 compatible = "amlogic,meson-gpio-intc-ext",
+					"amlogic,meson-g12a-gpio-intc";
 };
